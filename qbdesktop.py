@@ -1,9 +1,27 @@
 import win32com.client
 import pandas as pd
 import os
+from xml.etree import ElementTree
+from xml.etree.ElementTree import Element 
+from dataclasses import dataclass 
 
+#================================================================
+#CONST
+#================================================================
 DEFAULT_COMPANY_FILE = f"C:\\Users\\Public\\Documents\\Intuit\\QuickBooks\\Company Files"
+REQUESTS_PATH = os.path.join(os.getcwd(), "all_requests.xml")
 
+#================================================================
+# UTIL
+#================================================================
+
+
+
+#================================================================
+# DATACLASSES
+#================================================================
+
+@dataclass(slots=True)
 class FileMode:
     do_not_care = win32com.client.Dispatch("QBXMLRP2Lib.QBFileMode.qbFileOpenDoNotCare")
     single_user = win32com.client.Dispatch("QBXMLRP2Lib.QBFileMode.qbOpenSingleUser")
@@ -12,26 +30,122 @@ class FileMode:
     condense = win32com.client.Dispatch("QBXMLRP2Lib.QBFileMode.qbFileCondense")
     data_recovery = win32com.client.Dispatch("QBXMLRP2Lib.QBFileMode.qbFileAutoDataRecovery")
 
+    
+@dataclass(slots=True)
+class QBAgingReport:
+    BudgetSummary = 0 
+    CustomDetail = 1 
+    CustomSummary = 2
+    GeneralDetail = 3 
+    GeneralSummary = 4
+    Job = 5
+    PayrollDetail = 6
+    PayrollSummary =7
+    Time = 8
+    
+    
+@dataclass(slots=True)
+class QBJobReport:
+    ItemEstimatesVsActuals = 0
+    
+@dataclass(slots=True)
+class QBAgingRequest:
+    BudgetSummary = "BudgetSummaryReportQueryRq"
+    CustomDetail = "CustomDetailReportQueryRq"
+    CustomSummary = "CustomSummaryReportQueryRq"
+    GeneralDetail = "GeneralDetailReportQueryRq"
+    GeneralSummary = "GeneralSummaryReportQueryRq"
+    Job = "JobReportQueryRq"
+    PayrollDetail = "PayrollDetailReportQueryRq"
+    PayrollSummary = "PayrollSummaryReportQueryRq"
+    Time = "	TimeReportQueryRq"
+    
 
-class XMLRequest:
-    all_queries = '<?xml version="1.0" encoding="utf-8"?>' \
-        '<QBXML>' \
-        '   <QBXMLMsgsRq onError="stopOnError">' \
-        '       <AccountQueryRq metaData="MetaData">' \
-        '           <IncludeRetElement>*</IncludeRetElement>' \
-        '       </AccountQueryRq>' \
-        '       <CustomerQueryRq metaData="MetaData">' \
-        '           <IncludeRetElement>*</IncludeRetElement>' \
-        '       </CustomerQueryRq>' \
-        '       <VendorQueryRq metaData="MetaData">' \
-        '           <IncludeRetElement>*</IncludeRetElement>' \
-        '       </VendorQueryRq>' \
-        '       <ItemQueryRq metaData="MetaData">' \
-        '           <IncludeRetElement>*</IncludeRetElement>' \
-        '       </ItemQueryRq>' \
-        '   </QBXMLMsgsRq>' \
-        '</QBXML>'
+#================================================================
+# TYPES
+#================================================================
 
+
+class qbXML:
+    pass
+
+
+class Param:
+    def __init__(self, name: str, value: str) -> None:
+        self.name = name
+        self.value = value
+    
+    def read(self): 
+        return f'{self.name}="{self.value}"'
+        
+
+class Element(qbXML):
+    def __init__(self, name: str, value: str, indent: int=3) -> None:
+        self.name = name
+        self.value = value
+        self.indent = indent
+        self._indent = "\t"*indent
+        self.statement = f"{self._indent}<{self.name}{self.value}</{self.name}>"
+        super().__init__()
+        
+    def read(self) -> str:
+        return self.statement
+    
+
+class Aggregate(qbXML):
+    def __init__(self, name: str, elements: list[Element]=[], indent: int=2, params=[Param]) -> None:
+        super().__init__()
+        self.params: list[Param] = params 
+        self.name = name
+        self.elements = elements
+        self.indent = indent
+        
+        self.opening = f"<{self.name}"
+        for param in self.params:
+            self.opening += " "
+            self.opening+=param.read()
+        self.opening+=" >"
+        self.closing = f"</{self.name}>"
+        self.objects = [self.opening, self.closing]
+
+    def add_element(self, element: Element) -> None:
+        self.elements.append(element)
+        
+    def read(self) -> str:
+        objs = self.objects
+        for element in self.elements:
+            objs.insert(1, element.read())
+        return "\n".join(objs)
+        
+        
+class MessageAggregate(qbXML):
+    def __init__(self, name: str, aggregates: list[Aggregate]=[], indent: int=1, params:list[Param] =[]) -> None:
+        super().__init__()
+        self.params: list[Param] = params 
+        self.name = name
+        self.aggregates = aggregates
+        self.indent = indent
+        self.opening = f"<{self.name}"
+        for param in self.params:
+            self.opening += " "
+            self.opening+=param.read()
+        self.opening+=" >"
+        self.closing = f"</{self.name}>"
+        self.objects = [self.opening, self.closing]
+    
+    def add_aggregate(self, aggregate: Aggregate) -> None:
+        self.aggregates.append(aggregate)
+        
+    def read(self) -> str:
+        objs = self.objects
+        for agg in self.aggregates:
+            objs.insert(1, agg.read())
+        return "\n".join(objs)
+
+
+#================================================================
+# CLASSES
+#================================================================
 
 class QuickBooksResponse:
     def __init__(self, request: str=None, response: str=None) -> None:
@@ -48,7 +162,7 @@ class QuickBooksResponse:
         
 
 
-class QuickBooks:
+class RequestProcessor:
     def __init__(self, app_name: str) -> None:
         try:
             self.qbxmlrp = win32com.client.Dispatch("QBXMLRP2.RequestProcessor")
@@ -85,7 +199,7 @@ class QuickBooks:
     
     
 
-class Session:
+class SessionManager:
     def __init__(self, app_id, app_name, company_file_path):
         self.qb_session_manager = win32com.client.Dispatch("QBFC13.QBSessionManager")
         self.app_id = app_id
@@ -162,7 +276,7 @@ class Session:
         return response.Detail
     
 
-class RequestProcessor:
+class RequestProcessorDialog:
     def __init__(self, app_id, app_name, company_file_path):
         """ simple interface for showing the QuickBooks request processor 
         dialog and retrieving the response using the QBXMLRP2UI.RequestProcessorDialog
