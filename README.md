@@ -16,5 +16,9 @@ Second, Python is  a great choice for building custom integrations and working w
 
 Third, Python has a clean and simple syntax, which makes it easy to read and write code. This can help developers write code more quickly and efficiently, and can also make it easier for other developers to understand and modify the code as needed.
 
+# Getting Started
+```PowerShell
+git clone https://github.com/Donny-GUI/quickbooks-desktop-python.git
+pip install -r requirements.txt
 
- 
+```
