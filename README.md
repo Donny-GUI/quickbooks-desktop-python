@@ -45,6 +45,6 @@ Third, Python has a clean and simple syntax, which makes it easy to read and wri
 # Getting Started
 ```PowerShell
 git clone https://github.com/Donny-GUI/quickbooks-desktop-python.git
-pip install -r requirements.txt
-
+cd quickbooks-desktop-python
+python qbdesktop.py
 ```
