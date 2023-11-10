@@ -1,4 +1,4 @@
-import win32com.client
+from win32com import client
 import pandas as pd
 import os
 from xml.etree.ElementTree import Element 
@@ -20,12 +20,12 @@ REQUESTS_PATH = os.path.join(os.getcwd(), "all_requests.xml")
 # TODO: Needs work. Returns string based error
 #@dataclass(slots=True)
 #class FileMode:
-#    do_not_care = win32com.client.Dispatch("QBXMLRP2Lib.QBFileMode.qbFileOpenDoNotCare")
-#    single_user = win32com.client.Dispatch("QBXMLRP2Lib.QBFileMode.qbOpenSingleUser")
-#    multi_user = win32com.client.Dispatch("QBXMLRP2Lib.QBFileMode.qbOpenMultiUser")
-#    restore = win32com.client.Dispatch("QBXMLRP2Lib.QBFileMode.qbFileRestore")
-#    condense = win32com.client.Dispatch("QBXMLRP2Lib.QBFileMode.qbFileCondense")
-#    data_recovery = win32com.client.Dispatch("QBXMLRP2Lib.QBFileMode.qbFileAutoDataRecovery")
+#    do_not_care = client.Dispatch("QBXMLRP2Lib.QBFileMode.qbFileOpenDoNotCare")
+#    single_user = client.Dispatch("QBXMLRP2Lib.QBFileMode.qbOpenSingleUser")
+#    multi_user = client.Dispatch("QBXMLRP2Lib.QBFileMode.qbOpenMultiUser")
+#    restore = client.Dispatch("QBXMLRP2Lib.QBFileMode.qbFileRestore")
+#    condense = client.Dispatch("QBXMLRP2Lib.QBFileMode.qbFileCondense")
+#    data_recovery = client.Dispatch("QBXMLRP2Lib.QBFileMode.qbFileAutoDataRecovery")
 
     
 @dataclass(slots=True)
@@ -162,7 +162,7 @@ class QuickBooksResponse:
 class RequestProcessor:
     def __init__(self, app_name: str) -> None:
         try:
-            self.qbxmlrp = win32com.client.Dispatch("QBXMLRP2.RequestProcessor")
+            self.qbxmlrp = client.Dispatch("QBXMLRP2.RequestProcessor")
         except Exception as e:
             print(e)
             exit()
@@ -198,7 +198,7 @@ class RequestProcessor:
 
 class SessionManager:
     def __init__(self, app_id, app_name, company_file_path):
-        self.qb_session_manager = win32com.client.Dispatch("QBFC13.QBSessionManager")
+        self.qb_session_manager = client.Dispatch("QBFC13.QBSessionManager")
         self.app_id = app_id
         self.app_name = app_name
         self.company_file_path = company_file_path
@@ -285,7 +285,7 @@ class RequestProcessorDialog:
             app_name (_type_): _description_
             company_file_path (_type_): _description_
         """
-        self.qb_request_processor = win32com.client.Dispatch("QBXMLRP2UI.RequestProcessorDialog")
+        self.qb_request_processor = client.Dispatch("QBXMLRP2UI.RequestProcessorDialog")
         self.app_id = app_id
         self.app_name = app_name
         self.company_file_path = company_file_path
@@ -329,7 +329,7 @@ class WebConnector:
         Args:
             url (_type_): _description_
         """
-        self.qb_web_connector = win32com.client.Dispatch("QBWebConnector.QBWebConnectorSvc")
+        self.qb_web_connector = client.Dispatch("QBWebConnector.QBWebConnectorSvc")
         self.url = url
 
     def get_version(self):
@@ -423,7 +423,7 @@ class RequestAllData:
             company_file_path (_type_): _description_
             qb_file_mode (_type_): _description_
         """
-        self.qbxmlrp = win32com.client.Dispatch("QBXMLRP2.RequestProcessor")
+        self.qbxmlrp = client.Dispatch("QBXMLRP2.RequestProcessor")
         self.qbxmlrp.OpenConnection('', 'Python QuickBooks Connector')
         self.qbxmlrp.BeginSession(company_file_path, qb_file_mode)
 
@@ -435,6 +435,6 @@ class RequestAllData:
         request = self.qbxmlrp.CreateMsgSetRequest('US', '13.0')
         request.AppendRequestForFullSync()
         response_str = self.qbxmlrp.ProcessRequest(request.ToXMLString(), '')
-        response = win32com.client.Dispatch("QBXMLRP2.ResponseReader")
+        response = client.Dispatch("QBXMLRP2.ResponseReader")
         response.LoadString(response_str)
         return response
