@@ -7,7 +7,7 @@ import os
 
 
 
-def split_exe(input_file_path, output_folder, chunk_size_mb=50):
+def split_exe(input_file_path, output_folder, chunk_size_mb=20):
     if not os.path.exists(input_file_path):
         print(f"Error: File not found - {input_file_path}")
         return
@@ -47,15 +47,12 @@ def combine_chunks(input_folder: str, output_file: str) -> None:
     print("Combining complete.")
 
 def make_broken_zip():
-    installer_origin_zip = os.path.join(os.getcwd(), "installer\\QBSDK160_x64.exe")
-    installer_output_folder = os.path.join(os.getcwd(), "installer")
+    installer_origin_exe = "QBSDK160_x64.exe"
+    installer_output_folder = os.getcwd()
     split_exe("QBSDK160_x64.exe", installer_output_folder)
-    combine_chunks(os.path.join(os.getcwd(), "installer"), installer_origin_zip)
+    #combine_chunks(installer_output_folder, installer_origin_exe)
 
-def piece_together_exe_installer():
-    installer_origin_zip = os.path.join(os.getcwd(), "installer\\QBSDK160_x64.exe")
-    installer_output_folder = os.path.join(os.getcwd(), "installer")
-    combine_chunks(os.path.join(os.getcwd(), "installer"), installer_origin_zip)
+
 
 
 #===============================================================
@@ -70,14 +67,13 @@ def ensure_installation() -> None:
        complete and ready to use. """
     
     qb_sdk_path = "C:\\Program Files\\Intuit\\IDN\\QBSDK16.0"
-    installer_origin_zip = os.path.join(os.getcwd(), "installer\\QBSDK160_x64.zip")
-    installer_home_exe = os.path.join(os.getcwd(), "installer\\QBSDK160_x64.exe")
+    installer_home_exe = os.path.join(os.getcwd(),"QBSDK160_x64.exe")
     
     # check to see if the quickbooks sdk is available
     if not os.path.exists(qb_sdk_path):
         print("Running installer...")
-        combine_chunks(os.path.join(os.getcwd(), "installer"), installer_home_exe)
-        installer_path = os.path.join(os.getcwd(), "installer\\QBSDK160_x64.exe") # create installer path
+        combine_chunks(os.getcwd(), installer_home_exe)
+        installer_path = "QBSDK160_x64.exe" # create installer path
         install_process = subprocess.Popen([installer_path])                      # run the installer
         install_progress = install_process.poll() 
         while install_progress is None:                                           # wait for installer to finish
@@ -107,6 +103,9 @@ def precheck() -> None:
     else:
         print("Not running on Windows.")
         exit()
+    installer_path = os.path.join(os.getcwd(), "QBSDK160_64.exe")
+    if not os.path.exists(installer_path):
+        combine_chunks(os.getcwd(), installer_path)
 
     try:
         ensure_installation()
