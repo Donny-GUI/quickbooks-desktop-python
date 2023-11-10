@@ -1,6 +1,17 @@
 # quickbooks-desktop-python
 The QuickBooks SDK Python module provides a set of tools for integrating Python applications with QuickBooks Desktop. The module includes classes for connecting to the QuickBooks API, sending and receiving data using the QBXML protocol, and managing sessions with QuickBooks.
 
+# WorkFlow
+
+1. import needed libraries
+2. Run precheck
+   2.1 Check if Windows OS
+   2.2 Check if installer for sdk is Ran
+   2.3 Install necessary sdk
+3. Import Module
+
+
+
  example
 ```Python3
 from QuickBooks import QuickBooks, XMLRequest
