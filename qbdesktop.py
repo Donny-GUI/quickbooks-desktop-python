@@ -5,11 +5,16 @@ from xml.etree.ElementTree import Element
 from dataclasses import dataclass 
 import subprocess
 import time
+import platform
+
 
 
 #===============================================================
 # Installation Check
 #===============================================================
+
+def is_windows():
+    return platform.system().lower() == 'windows'
 
 def ensure_installation() -> None:
     """Make sure that the quickbooks installation is 
@@ -44,12 +49,22 @@ def ensure_installation() -> None:
     else:
         print("installation checked and passed successfully") 
 
-try:
-    ensure_installation()
-except Exception as e:
-    print(e)
-    print("installation failed to proceed or pass.")
-    exit()
+def precheck() -> None:
+    if is_windows():
+        print("Running on Windows.")
+    else:
+        print("Not running on Windows.")
+        exit()
+
+    try:
+        ensure_installation()
+    except Exception as e:
+        print(e)
+        print("installation failed to proceed or pass.")
+        exit()
+
+precheck()
+
 
 #================================================================
 #CONST
