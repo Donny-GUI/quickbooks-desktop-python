@@ -1,5 +1,14 @@
-from win32com import client
-import pandas as pd
+import subprocess 
+try:
+    from win32com import client
+except Exception as e:
+    subprocess.run(["pip install pywin32"])
+
+try:
+    import pandas as pd
+except Exception as e:
+    subprocess.run(["pip install pandas"])
+    
 import os
 from xml.etree.ElementTree import Element 
 from dataclasses import dataclass
