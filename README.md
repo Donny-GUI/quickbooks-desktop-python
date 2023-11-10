@@ -3,16 +3,16 @@ The QuickBooks SDK Python module provides a set of tools for integrating Python 
 
 # WorkFlow
 
-1. import needed libraries
+1. Import libraries
 2. Run precheck
    2.1 Check if Windows OS
    2.2 Check if installer for sdk is Ran
-   2.3 Install necessary sdk
+   2.3 Install necessary sdk components
 3. Import Module
 
 
 
- example
+ # Example
 ```Python3
 from QuickBooks import QuickBooks, XMLRequest
 
