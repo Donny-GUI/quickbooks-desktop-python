@@ -1,9 +1,55 @@
 import win32com.client
 import pandas as pd
 import os
-from xml.etree import ElementTree
 from xml.etree.ElementTree import Element 
 from dataclasses import dataclass 
+import subprocess
+import time
+
+
+#===============================================================
+# Installation Check
+#===============================================================
+
+def ensure_installation() -> None:
+    """Make sure that the quickbooks installation is 
+       complete and ready to use. """
+    
+    qb_sdk_path = "C:\\Program Files\\Intuit\\IDN\\QBSDK16.0"
+    
+    # check to see if the quickbooks sdk is available
+    if not os.path.exists(qb_sdk_path):
+        print("Running installer...")
+        installer_path = os.path.join(os.getcwd(), "installer\\QBSDK160_x64.exe") # create installer path
+        install_process = subprocess.Popen([installer_path])                      # run the installer
+        install_progress = install_process.poll() 
+        while install_progress is None:                                           # wait for installer to finish
+            install_progress = install_process.poll()
+            time.sleep(0.50)
+        print(install_process.returncode)
+
+        qb_xml_requester_path = "C:\\Program Files (x86)\\Intuit\\IDN\\QBSDK16.0\\tools\\installers"
+        for root, dirs, files in os.walk(qb_xml_requester_path):
+            for file in files:
+                print("installing ", file)
+                exepath = os.path.join(root, file)
+                installing_process = subprocess.Popen([exepath])
+                installing_progress = installing_process.poll()
+                while installing_progress is None:
+                    installing_progress = installing_process.poll()
+                    time.sleep(0.50)
+                print(install_process.returncode)
+
+        print("installation complete")
+    else:
+        print("installation checked and passed successfully") 
+
+try:
+    ensure_installation()
+except Exception as e:
+    print(e)
+    print("installation failed to proceed or pass.")
+    exit()
 
 #================================================================
 #CONST
@@ -21,14 +67,15 @@ REQUESTS_PATH = os.path.join(os.getcwd(), "all_requests.xml")
 # DATACLASSES
 #================================================================
 
-@dataclass(slots=True)
-class FileMode:
-    do_not_care = win32com.client.Dispatch("QBXMLRP2Lib.QBFileMode.qbFileOpenDoNotCare")
-    single_user = win32com.client.Dispatch("QBXMLRP2Lib.QBFileMode.qbOpenSingleUser")
-    multi_user = win32com.client.Dispatch("QBXMLRP2Lib.QBFileMode.qbOpenMultiUser")
-    restore = win32com.client.Dispatch("QBXMLRP2Lib.QBFileMode.qbFileRestore")
-    condense = win32com.client.Dispatch("QBXMLRP2Lib.QBFileMode.qbFileCondense")
-    data_recovery = win32com.client.Dispatch("QBXMLRP2Lib.QBFileMode.qbFileAutoDataRecovery")
+# TODO: Needs work. Returns string based error
+#@dataclass(slots=True)
+#class FileMode:
+#    do_not_care = win32com.client.Dispatch("QBXMLRP2Lib.QBFileMode.qbFileOpenDoNotCare")
+#    single_user = win32com.client.Dispatch("QBXMLRP2Lib.QBFileMode.qbOpenSingleUser")
+#    multi_user = win32com.client.Dispatch("QBXMLRP2Lib.QBFileMode.qbOpenMultiUser")
+#    restore = win32com.client.Dispatch("QBXMLRP2Lib.QBFileMode.qbFileRestore")
+#    condense = win32com.client.Dispatch("QBXMLRP2Lib.QBFileMode.qbFileCondense")
+#    data_recovery = win32com.client.Dispatch("QBXMLRP2Lib.QBFileMode.qbFileAutoDataRecovery")
 
     
 @dataclass(slots=True)
