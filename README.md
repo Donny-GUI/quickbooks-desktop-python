@@ -13,6 +13,7 @@ The QuickBooks SDK Python module provides a set of tools for integrating Python 
 
 
  # Example
+ 
 ```Python3
 from QuickBooks import QuickBooks, XMLRequest
 
